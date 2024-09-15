@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from .models import BoardModel
+from django.contrib.auth.decorators import login_required
 
 def signupfunc(request):
     if request.method == 'POST':
@@ -24,14 +25,18 @@ def loginfunc(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return render(request, 'login.html', {'context':'ログインしました'})
+            return redirect('list')
         else:
-            return render(request, 'login.html', {'context':'ログインしていません'})
+            return render(request, 'login.html', {})
     else:
-        return render(request, 'login.html', {'context':'get method'})
+        return render(request, 'login.html', {})
 
-
+@login_required
 def listfunc(request):
     object_list = BoardModel.objects.all()
     return render(request, 'list.html', {'object_list':object_list})
 
+
+def logoutfunc(request):
+    logout(request)
+    return redirect('login')
